@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">dolen</string>
+    <string name="tab_text_1">ToDo</string>
+    <string name="tab_text_2">Chat</string>
+    <string name="tab_text_3">Tab 3</string>
+    <string name="tab_text_4">Tab 4</string>
+    <string name="tab_text_5">Tab 5</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment_todo">Hello blank fragment ToDo</string>
+    <string name="hello_blank_fragment_chat">Hello blank fragment Chat</string>
+</resources>

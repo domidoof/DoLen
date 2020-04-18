@@ -1,0 +1,2 @@
+rootProject.name='dolen'
+include ':app'
