@@ -13,7 +13,7 @@ import java.util.ArrayList;
 //die Klasse mit der derzeit die Daten gespeichert werden
 public class FileHelper {
 
-    public static final String FILENAME = "listinfo.dat";
+    private static final String FILENAME = "listinfo.dat";
 
     public static void writeData(ArrayList<String> items, Context context){
 

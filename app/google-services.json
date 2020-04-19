@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "593391241298",
+    "firebase_url": "https://dolen-fa6d8.firebaseio.com",
+    "project_id": "dolen-fa6d8",
+    "storage_bucket": "dolen-fa6d8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:593391241298:android:a5b20e77147062cce2f78b",
+        "android_client_info": {
+          "package_name": "com.example.dolen"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "593391241298-3dtdujkvu219rv3bsfncg8luhgsal78p.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.dolen",
+            "certificate_hash": "ecf1f31e3fe5f6c7a92b96555d375a1848031710"
+          }
+        },
+        {
+          "client_id": "593391241298-c7boif1pp8f8pg7qghf8tkq759a0802l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC86M_J_PyUo6M74aod6N5J7Z_2yxEFoLI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "593391241298-c7boif1pp8f8pg7qghf8tkq759a0802l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
