@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">dolen</string>
+    <string name="app_name">DoLen</string>
     <string name="tab_text_1">ToDo</string>
     <string name="tab_text_2">Chat</string>
     <string name="tab_text_3">Tab 3</string>

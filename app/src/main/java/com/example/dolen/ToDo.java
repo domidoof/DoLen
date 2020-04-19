@@ -1,6 +1,8 @@
 package com.example.dolen;
 
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,6 +16,8 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.dolen.ui.main.FileHelper;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -25,16 +29,36 @@ public class ToDo extends Fragment {
     public ArrayAdapter<String> adapter;
     private EditText itemAdd;
 
+    FirebaseDatabase database;
+    DatabaseReference ref;
+
     //Button zum hinzufügen von neuen to-dos
     private View.OnClickListener btnAddListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            database = FirebaseDatabase.getInstance();
+            ref = database.getReference("tasks");
+
+            Log.d("DATABASE", ref.toString());
+            Log.d("DATABASE-1234", database.toString());
+
             String itemEntered = itemAdd.getText().toString();
             Log.d("ITEM", itemAdd.getText().toString());
             adapter.add(itemEntered);
+            ref.child("1").setValue(itemEntered);
             itemAdd.setText("");
+
             FileHelper.writeData(items, Objects.requireNonNull(getActivity()));
             Toast.makeText(getActivity(), "Item Added", Toast.LENGTH_SHORT).show();
+        }
+    };
+
+    //Inhalte der to-do liste mit online firebase aktualisieren
+    private View.OnClickListener fabUpdateListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
         }
     };
 
@@ -61,6 +85,7 @@ public class ToDo extends Fragment {
         itemAdd = v.findViewById(R.id.item_edit_text);
         Button btnAdd = v.findViewById(R.id.add_btn);
         ListView itemsList = v.findViewById(R.id.items_list);
+        FloatingActionButton fab = v.findViewById(R.id.fab);
 
         items = FileHelper.readData(Objects.requireNonNull(getActivity()));
 
@@ -70,6 +95,8 @@ public class ToDo extends Fragment {
         btnAdd.setOnClickListener(btnAddListener);
 
         itemsList.setOnItemClickListener(itemListClickListener);
+
+        fab.setOnClickListener(fabUpdateListener);
 
         return v;
         }
