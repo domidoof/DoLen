@@ -1,6 +1,7 @@
 package com.example.dolen;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -16,8 +17,11 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.dolen.ui.main.FileHelper;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -25,27 +29,50 @@ import java.util.Objects;
 //klasse für die to-do-liste
 public class ToDo extends Fragment {
 
+/*
+    Collection<String> listOnline = new ArrayList(Arrays.asList("a","b", "c", "d", "e", "f", "g"));
+    Collection<String> listOffline = new ArrayList(Arrays.asList("a","b",  "d", "e", "f", "gg", "h"));
+
+    List<String> sourceList = new ArrayList<String>(listOnline);
+    List<String> destinationList = new ArrayList<String>(listOffline);
+
+
+    sourceList.removeAll( listOffline );
+    destinationList.removeAll( listOnline );
+
+
+
+    System.out.println( sourceList ); //in on-list neu hinzugefügt, während user off
+    System.out.println( destinationList ); //in off-list während off neu hinzugefügt, aber nicht in on-list
+ */
+
+
+
+
+
     public ArrayList<String> items;
+    public ArrayList<String> itemsOnline = new ArrayList<>();
     public ArrayAdapter<String> adapter;
     private EditText itemAdd;
 
     FirebaseDatabase database;
-    DatabaseReference ref;
+    DatabaseReference refAddTasks;
+    DatabaseReference refTaskList;
 
     //Button zum hinzufügen von neuen to-dos
     private View.OnClickListener btnAddListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            database = FirebaseDatabase.getInstance();
-            ref = database.getReference("tasks");
+            refAddTasks = database.getReference("tasks");
 
-            Log.d("DATABASE", ref.toString());
+            Log.d("DATABASE", refAddTasks.toString());
             Log.d("DATABASE-1234", database.toString());
 
             String itemEntered = itemAdd.getText().toString();
             Log.d("ITEM", itemAdd.getText().toString());
             adapter.add(itemEntered);
-            ref.child("1").setValue(itemEntered);
+            Log.d("ITEM-123", String.valueOf(refAddTasks.child("1")));
+            refAddTasks.child("1/").setValue(itemEntered);
             itemAdd.setText("");
 
             FileHelper.writeData(items, Objects.requireNonNull(getActivity()));
@@ -57,10 +84,36 @@ public class ToDo extends Fragment {
     private View.OnClickListener fabUpdateListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
+            getDatabaseTasks();
         }
     };
+
+    private void getDatabaseTasks() {
+
+        refTaskList = database.getReference("tasks");
+        refTaskList.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                itemsOnline.clear();
+                for (DataSnapshot snp : dataSnapshot.getChildren()) {
+                    itemsOnline.add(String.valueOf(snp.getValue()));
+                    Log.d("TAG-DB-Items", "Value is: " + snp);
+                }
+                adapter.notifyDataSetChanged();
+
+                FileHelper.writeData(items, Objects.requireNonNull(getActivity()));
+
+                Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.w("TAG", "Failed to read value.", databaseError.toException());
+
+            }
+        });
+
+    }
 
     //Wenn auf ein item in der to-do liste geklickt wird, wird es gelöscht und eine Nachricht erscheint
     private AdapterView.OnItemClickListener itemListClickListener = new AdapterView.OnItemClickListener() {
@@ -87,9 +140,41 @@ public class ToDo extends Fragment {
         ListView itemsList = v.findViewById(R.id.items_list);
         FloatingActionButton fab = v.findViewById(R.id.fab);
 
-        items = FileHelper.readData(Objects.requireNonNull(getActivity()));
+        database = FirebaseDatabase.getInstance();
 
-        adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, items);
+        refTaskList = database.getReference("tasks");
+        Log.d("TAG-DB-Ref", String.valueOf(refTaskList));
+        refTaskList.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d("TAG-DB-Items", String.valueOf(dataSnapshot));
+                itemsOnline.clear();
+                for (DataSnapshot snp : dataSnapshot.getChildren()) {
+                    itemsOnline.add(snp.getValue(String.class));
+                    Log.d("TAG-DB-Items", "Value is: " + snp.getValue());
+                }
+
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.w("TAG", "Failed to read value.", databaseError.toException());
+
+            }
+        });
+
+        //items = FileHelper.readData(Objects.requireNonNull(getActivity()));
+
+
+
+        adapter = new ArrayAdapter<String>(Objects.requireNonNull(getActivity()), android.R.layout.simple_list_item_1, itemsOnline);
+
+        Log.d("ADAPTER-TAG", String.valueOf(itemsOnline));
+        Log.d("ADAPTER-ACTIVITY", String.valueOf(getActivity()));
+
+
+
         itemsList.setAdapter(adapter);
 
         btnAdd.setOnClickListener(btnAddListener);
