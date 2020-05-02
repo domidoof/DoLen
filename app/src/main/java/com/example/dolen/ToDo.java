@@ -29,29 +29,9 @@ import java.util.Objects;
 //klasse für die to-do-liste
 public class ToDo extends Fragment {
 
-/*
-    Collection<String> listOnline = new ArrayList(Arrays.asList("a","b", "c", "d", "e", "f", "g"));
-    Collection<String> listOffline = new ArrayList(Arrays.asList("a","b",  "d", "e", "f", "gg", "h"));
-
-    List<String> sourceList = new ArrayList<String>(listOnline);
-    List<String> destinationList = new ArrayList<String>(listOffline);
-
-
-    sourceList.removeAll( listOffline );
-    destinationList.removeAll( listOnline );
-
-
-
-    System.out.println( sourceList ); //in on-list neu hinzugefügt, während user off
-    System.out.println( destinationList ); //in off-list während off neu hinzugefügt, aber nicht in on-list
- */
-
-
-
-
-
     public ArrayList<String> items;
     public ArrayList<String> itemsOnline = new ArrayList<>();
+    public ArrayList<String> itemsOnlineKey = new ArrayList<>();
     public ArrayAdapter<String> adapter;
     private EditText itemAdd;
 
@@ -65,17 +45,16 @@ public class ToDo extends Fragment {
         public void onClick(View v) {
             refAddTasks = database.getReference("tasks");
 
-            Log.d("DATABASE", refAddTasks.toString());
-            Log.d("DATABASE-1234", database.toString());
-
             String itemEntered = itemAdd.getText().toString();
             Log.d("ITEM", itemAdd.getText().toString());
             adapter.add(itemEntered);
             Log.d("ITEM-123", String.valueOf(refAddTasks.child("1")));
-            refAddTasks.child("1/").setValue(itemEntered);
+
+            DatabaseReference newPostRef = refAddTasks.push();
+            newPostRef.setValue(itemEntered);
             itemAdd.setText("");
 
-            FileHelper.writeData(items, Objects.requireNonNull(getActivity()));
+            //FileHelper.writeData(items, Objects.requireNonNull(getActivity()));
             Toast.makeText(getActivity(), "Item Added", Toast.LENGTH_SHORT).show();
         }
     };
@@ -95,13 +74,15 @@ public class ToDo extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 itemsOnline.clear();
+                itemsOnlineKey.clear();
                 for (DataSnapshot snp : dataSnapshot.getChildren()) {
                     itemsOnline.add(String.valueOf(snp.getValue()));
+                    itemsOnlineKey.add(snp.getKey());
                     Log.d("TAG-DB-Items", "Value is: " + snp);
                 }
                 adapter.notifyDataSetChanged();
 
-                FileHelper.writeData(items, Objects.requireNonNull(getActivity()));
+                //FileHelper.writeData(items, Objects.requireNonNull(getActivity()));
 
                 Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
             }
@@ -119,9 +100,11 @@ public class ToDo extends Fragment {
     private AdapterView.OnItemClickListener itemListClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            items.remove(position);
+            itemsOnline.remove(position);
+            Log.d("TAG-DB-Items", String.valueOf(position));
             adapter.notifyDataSetChanged();
-            FileHelper.writeData(items, Objects.requireNonNull(getActivity()));
+            refTaskList.child(itemsOnlineKey.get(position)).removeValue();
+            //FileHelper.writeData(items, Objects.requireNonNull(getActivity()));
             Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
         }
     };
@@ -143,15 +126,15 @@ public class ToDo extends Fragment {
         database = FirebaseDatabase.getInstance();
 
         refTaskList = database.getReference("tasks");
-        Log.d("TAG-DB-Ref", String.valueOf(refTaskList));
+
         refTaskList.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d("TAG-DB-Items", String.valueOf(dataSnapshot));
+                itemsOnlineKey.clear();
                 itemsOnline.clear();
                 for (DataSnapshot snp : dataSnapshot.getChildren()) {
                     itemsOnline.add(snp.getValue(String.class));
-                    Log.d("TAG-DB-Items", "Value is: " + snp.getValue());
+                    itemsOnlineKey.add(snp.getKey());
                 }
 
                 adapter.notifyDataSetChanged();
@@ -166,14 +149,7 @@ public class ToDo extends Fragment {
 
         //items = FileHelper.readData(Objects.requireNonNull(getActivity()));
 
-
-
         adapter = new ArrayAdapter<String>(Objects.requireNonNull(getActivity()), android.R.layout.simple_list_item_1, itemsOnline);
-
-        Log.d("ADAPTER-TAG", String.valueOf(itemsOnline));
-        Log.d("ADAPTER-ACTIVITY", String.valueOf(getActivity()));
-
-
 
         itemsList.setAdapter(adapter);
 
